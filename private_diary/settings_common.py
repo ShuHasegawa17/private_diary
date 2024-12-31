@@ -30,7 +30,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # ↓関連アプリの登録
     "diary.apps.DiaryConfig",
+    "accounts.apps.AccountsConfig",
+    # 認証関連
+    "django.contrib.sites",
+    "allauth",
+    "allauth.account",
+    "django_bootstrap5",
 ]
 
 MIDDLEWARE = [
@@ -41,6 +48,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # 認証関連
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "private_diary.urls"
@@ -127,3 +136,34 @@ MESSAGE_TAGS = {
     messages.SUCCESS: "alert alert-success",
     messages.INFO: "alert alert-info",
 }
+
+AUTH_USER_MODEL = "accounts.CustomUser"
+
+# django.contrib.sitesの設定
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = (
+    "allauth.account.auth_backends.AuthenticationBackend",
+    "django.contrib.auth.backends.ModelBackend",
+)
+
+# メールアドレス認証
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_USERNAME_REQUIRED = False
+
+# サインアップ後のメールアドレス確認
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_REQUIRED = True
+
+# ログイン、ログアウト後の遷移先
+LOGIN_REDIRECT_URL = "diary:index"
+ACCOUNT_LOGOUT_REDIRECT_URL = "account_login"
+
+# ログアウトクリックだけでログアウト
+ACCOUNT_LOGOUT_ON_GET = True
+
+# メール件名の接頭辞をブランク
+ACCOUNT_EMAIL_SUBJECT_PREFIX = ""
+
+# デフォルトのメール送信先
+DEFAULT_FROM_EMAIL = os.environ.get("FROM_EMAIL")

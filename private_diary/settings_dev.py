@@ -50,6 +50,10 @@ LOGGING = {
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+MEDIA_URL = "/media/"
+
 # 起動方法
 # source ../bin/activate
 # vscodeの実行とデバッグから起動
