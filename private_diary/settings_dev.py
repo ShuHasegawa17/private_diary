@@ -52,9 +52,10 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-MEDIA_URL = "/media/"
-
 # 起動方法
 # source ../bin/activate
 # vscodeの実行とデバッグから起動
 # ↑.vscodeのlaunch.json の起動スクリプトを実行
+# superuser
+# shuhasegawa m
+# shuhasegawa0430@gmail.com

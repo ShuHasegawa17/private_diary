@@ -65,6 +65,17 @@
                 INQUIRY
               </a>
             </li>
+            {% if user.is_authenticated %}
+            <!--  -->
+            <li class="nav-item">
+              <a
+                class="nav-link {% block active_diary_list %}{% endblock %}"
+                href="{% url 'diary:diary_list' %}"
+              >
+                DIARY LIST
+              </a>
+            </li>
+            {% endif %}
           </ul>
           <ul class="navbar-nav ms-auto">
             {% if user.is_authenticated %}
