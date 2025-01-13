@@ -2,12 +2,22 @@ import logging
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.views import generic
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.shortcuts import get_object_or_404
 
-from .form import InquiryForm
+from .form import InquiryForm, DiaryCreateForm
 from .models import Diary
 
 logger = logging.getLogger(__name__)
+
+
+class OnlyYouMixin(UserPassesTestMixin):
+    raise_exception = True
+
+    def test_func(self):
+        # URLに埋め込まれたidから日記データを取得し、ユーザが異なればエラー
+        diary = get_object_or_404(Diary, pk=self.kwargs["id"])
+        return self.request.user == diary.user
 
 
 # Create your views here.
@@ -37,7 +47,54 @@ class DiaryListView(LoginRequiredMixin, generic.ListView):
         return diaries
 
 
-class DiaryDetailView(LoginRequiredMixin, generic.DetailView):
+class DiaryDetailView(LoginRequiredMixin, OnlyYouMixin, generic.DetailView):
     model = Diary
     template_name = "diary_detail.html"
     pk_url_kwarg = "id"
+
+
+class DiaryCreateView(LoginRequiredMixin, generic.CreateView):
+    model = Diary
+    template_name = "diary_create.html"
+    form_class = DiaryCreateForm
+    success_url = reverse_lazy("diary:diary_list")
+
+    def form_valid(self, form):
+        diary = form.save(commit=False)
+        diary.user = self.request.user
+        diary.save()
+        messages.success(self.request, "日記を作成しました。")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "日記の作成に失敗しました。")
+        return super().form_invalid(form)
+
+
+class DiaryUpdateView(LoginRequiredMixin, OnlyYouMixin, generic.UpdateView):
+    model = Diary
+    template_name = "diary_update.html"
+    pk_url_kwarg = "id"
+    form_class = DiaryCreateForm
+
+    def get_success_url(self):
+        return reverse_lazy("diary:diary_detail", kwargs={"id": self.kwargs["id"]})
+
+    def form_valid(self, form):
+        messages.success(self.request, "日記を更新しました。")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "日記の更新に失敗しました。")
+        return super().form_invalid(form)
+
+
+class DiaryDelete(LoginRequiredMixin, OnlyYouMixin, generic.DeleteView):
+    model = Diary
+    template_name = "diary_delete.html"
+    pk_url_kwarg = "id"
+    success_url = reverse_lazy("diary:diary_list")
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self, request, "日記を削除しました。")
+        return super().delete(request, *args, **kwargs)
